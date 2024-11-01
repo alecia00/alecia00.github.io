@@ -1,6 +1,6 @@
 <div align="center">
   
-![Header]([URL_GAMBAR_ANDA](https://raw.githubusercontent.com/alecia00/alecia00.github.io/refs/heads/main/cleo.png))
+<img src="https://raw.githubusercontent.com/alecia00/alecia00.github.io/refs/heads/main/cleo.png" alt="Header">
 
 # CLEO
 
