@@ -1,14 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CLEO - Testnet Node Contributor</title>
-    <!-- Favicon untuk tab browser -->
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='45' fill='%230d1428' stroke='%237cf7ff' stroke-width='2'/%3E%3Ctext x='50' y='65' font-family='Arial' font-size='40' fill='%237cf7ff' text-anchor='middle'%3EC%3C/text%3E%3C/svg%3E">
+    <title>MetaMask Backup Tool</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto:wght@300;400&display=swap');
-
         * {
             margin: 0;
             padding: 0;
@@ -16,225 +12,438 @@
         }
 
         body {
-            margin: 0;
-            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             display: flex;
-            flex-direction: column;
             justify-content: center;
             align-items: center;
-            background-image: url('/api/placeholder/1920/1080');
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            color: white;
-            font-family: 'Roboto', sans-serif;
-            text-align: center;
-            overflow-x: hidden;
-        }
-
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(
-                135deg,
-                rgba(0, 0, 0, 0.7) 0%,
-                rgba(0, 40, 80, 0.8) 100%
-            );
-            z-index: 1;
+            padding: 20px;
         }
 
         .container {
-            position: relative;
-            z-index: 2;
-            padding: 2rem;
-        }
-
-        .logo {
-            width: 120px;
-            height: 120px;
-            margin-bottom: 2rem;
-            animation: rotateLogo 20s linear infinite;
-        }
-
-        .logo-circle {
-            fill: #0d1428;
-            stroke: #7cf7ff;
-            stroke-width: 2;
-            filter: drop-shadow(0 0 10px rgba(124, 247, 255, 0.5));
-        }
-
-        .logo-text {
-            fill: #7cf7ff;
-            font-family: 'Orbitron', sans-serif;
-            font-size: 40px;
-            filter: drop-shadow(0 0 5px rgba(124, 247, 255, 0.5));
-        }
-
-        .frame {
-            position: relative;
-            padding: 60px 80px;
-            border: 2px solid rgba(255, 255, 255, 0.1);
-            background: rgba(13, 20, 40, 0.6);
-            backdrop-filter: blur(10px);
+            background: white;
             border-radius: 20px;
-            transform: perspective(1000px) rotateX(0deg);
-            transition: transform 0.3s ease;
-            animation: float 6s ease-in-out infinite;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
         }
 
-        .frame:hover {
-            transform: perspective(1000px) rotateX(5deg);
+        .warning-banner {
+            background: #ff6b6b;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            font-weight: bold;
         }
 
         h1 {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 4em;
-            margin-bottom: 0.5em;
-            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
-            letter-spacing: 15px;
-            background: linear-gradient(45deg, #fff, #7cf7ff);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            animation: glow 2s ease-in-out infinite alternate;
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 2.5em;
         }
 
-        p {
-            font-size: 1.5em;
-            letter-spacing: 5px;
-            color: #7cf7ff;
-            text-shadow: 0 0 5px rgba(124, 247, 255, 0.5);
-            opacity: 0.9;
-            margin-top: 1rem;
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1em;
         }
 
-        .decoration {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            top: 0;
-            left: 0;
-            pointer-events: none;
+        .button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px;
+            display: inline-block;
+            text-decoration: none;
         }
 
-        .decoration::before,
-        .decoration::after {
-            content: '';
-            position: absolute;
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        .button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .wallet-info {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: left;
+        }
+
+        .wallet-info h3 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .address-display {
+            background: #e9ecef;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            word-break: break-all;
+            font-family: 'Courier New', monospace;
+        }
+
+        .private-key-display {
+            background: #fff3cd;
+            border: 2px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            word-break: break-all;
+            font-family: 'Courier New', monospace;
+            color: #856404;
+        }
+
+        .copy-button {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9em;
+            margin-left: 10px;
+        }
+
+        .copy-button:hover {
+            background: #218838;
+        }
+
+        .status {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 8px;
+            font-weight: bold;
+        }
+
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .security-notes {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 30px 0;
+            text-align: left;
+        }
+
+        .security-notes h3 {
+            color: #856404;
+            margin-bottom: 10px;
+        }
+
+        .security-notes ul {
+            color: #856404;
+            margin-left: 20px;
+        }
+
+        .security-notes li {
+            margin: 5px 0;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .loading {
+            display: inline-block;
             width: 20px;
             height: 20px;
-            border: 2px solid rgba(124, 247, 255, 0.5);
-        }
-
-        .decoration::before {
-            top: 20px;
-            left: 20px;
-            border-right: none;
-            border-bottom: none;
-        }
-
-        .decoration::after {
-            bottom: 20px;
-            right: 20px;
-            border-left: none;
-            border-top: none;
-        }
-
-        @keyframes rotateLogo {
-            from {
-                transform: rotate(0deg);
-            }
-            to {
-                transform: rotate(360deg);
-            }
-        }
-
-        @keyframes float {
-            0%, 100% {
-                transform: translateY(0);
-            }
-            50% {
-                transform: translateY(-20px);
-            }
-        }
-
-        @keyframes glow {
-            from {
-                text-shadow: 0 0 5px rgba(124, 247, 255, 0.5),
-                             0 0 10px rgba(124, 247, 255, 0.5),
-                             0 0 15px rgba(124, 247, 255, 0.5);
-            }
-            to {
-                text-shadow: 0 0 10px rgba(124, 247, 255, 0.7),
-                             0 0 20px rgba(124, 247, 255, 0.7),
-                             0 0 30px rgba(124, 247, 255, 0.7);
-            }
-        }
-
-        .particles {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 1;
-            pointer-events: none;
-        }
-
-        .particle {
-            position: absolute;
-            width: 2px;
-            height: 2px;
-            background-color: rgba(124, 247, 255, 0.5);
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
             border-radius: 50%;
-            animation: particleFloat 20s infinite linear;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
         }
 
-        @keyframes particleFloat {
-            0% {
-                transform: translateY(100vh) translateX(0);
-                opacity: 0;
-            }
-            50% {
-                opacity: 1;
-            }
-            100% {
-                transform: translateY(-100vh) translateX(100px);
-                opacity: 0;
-            }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
     </style>
 </head>
 <body>
-    <div class="particles">
-        <script>
-            function createParticles() {
-                const particlesContainer = document.querySelector('.particles');
-                for (let i = 0; i < 50; i++) {
-                    const particle = document.createElement('div');
-                    particle.className = 'particle';
-                    particle.style.left = Math.random() * 100 + 'vw';
-                    particle.style.animationDelay = Math.random() * 20 + 's';
-                    particlesContainer.appendChild(particle);
-                }
-            }
-            createParticles();
-        </script>
-    </div>
     <div class="container">
-        <svg class="logo" viewBox="0 0 100 100">
-            <circle class="logo-circle" cx="50" cy="50" r="45"/>
-            <text class="logo-text" x="50" y="65" text-anchor="middle">C</text>
-        </svg>
-        <div class="frame">
-            <div class="decoration"></div>
-            <h1>CLEO</h1>
-            <p>TESTNET NODE CONTRIBUTOR</p>
+        <div class="warning-banner">
+            ⚠️ PERINGATAN: Hanya gunakan untuk backup pribadi! Jangan bagikan private key ke siapapun!
+        </div>
+
+        <h1>🔐 MetaMask Backup Tool</h1>
+        <p class="subtitle">Tool sederhana untuk backup private key MetaMask Anda</p>
+
+        <div id="metamask-check" class="status hidden"></div>
+
+        <div id="connect-section">
+            <button id="connect-wallet" class="button">
+                🦊 Hubungkan MetaMask
+            </button>
+        </div>
+
+        <div id="wallet-section" class="hidden">
+            <div class="wallet-info">
+                <h3>📋 Informasi Wallet</h3>
+                <div>
+                    <strong>Alamat:</strong>
+                    <div class="address-display" id="wallet-address"></div>
+                </div>
+                <div>
+                    <strong>Network:</strong>
+                    <div id="network-info"></div>
+                </div>
+                <div>
+                    <strong>Balance:</strong>
+                    <div id="balance-info"></div>
+                </div>
+            </div>
+
+            <button id="get-private-key" class="button">
+                🔑 Ambil Private Key
+            </button>
+
+            <div id="private-key-section" class="hidden">
+                <div class="wallet-info">
+                    <h3>🔐 Private Key</h3>
+                    <div class="private-key-display" id="private-key-display"></div>
+                    <button id="copy-private-key" class="copy-button">📋 Copy</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="security-notes">
+            <h3>🛡️ Catatan Keamanan</h3>
+            <ul>
+                <li>Private key memberikan akses penuh ke wallet Anda</li>
+                <li>Jangan pernah membagikan private key ke siapapun</li>
+                <li>Simpan private key di tempat yang aman dan offline</li>
+                <li>Tool ini berjalan secara lokal di browser Anda</li>
+                <li>Tidak ada data yang dikirim ke server manapun</li>
+            </ul>
         </div>
     </div>
+
+    <script>
+        class MetaMaskBackupTool {
+            constructor() {
+                this.web3 = null;
+                this.account = null;
+                this.init();
+            }
+
+            init() {
+                this.checkMetaMask();
+                this.bindEvents();
+            }
+
+            checkMetaMask() {
+                const statusDiv = document.getElementById('metamask-check');
+                statusDiv.classList.remove('hidden');
+
+                if (typeof window.ethereum !== 'undefined') {
+                    statusDiv.className = 'status success';
+                    statusDiv.textContent = '✅ MetaMask terdeteksi!';
+                } else {
+                    statusDiv.className = 'status error';
+                    statusDiv.innerHTML = '❌ MetaMask tidak terdeteksi! <a href="https://metamask.io" target="_blank">Install MetaMask</a>';
+                    document.getElementById('connect-wallet').disabled = true;
+                }
+            }
+
+            bindEvents() {
+                document.getElementById('connect-wallet').addEventListener('click', () => {
+                    this.connectWallet();
+                });
+
+                document.getElementById('get-private-key').addEventListener('click', () => {
+                    this.getPrivateKey();
+                });
+
+                document.getElementById('copy-private-key').addEventListener('click', () => {
+                    this.copyPrivateKey();
+                });
+            }
+
+            async connectWallet() {
+                try {
+                    const button = document.getElementById('connect-wallet');
+                    button.innerHTML = '<span class="loading"></span>Menghubungkan...';
+                    button.disabled = true;
+
+                    // Request account access
+                    const accounts = await window.ethereum.request({
+                        method: 'eth_requestAccounts'
+                    });
+
+                    this.account = accounts[0];
+                    
+                    // Get network info
+                    const chainId = await window.ethereum.request({
+                        method: 'eth_chainId'
+                    });
+
+                    // Get balance
+                    const balance = await window.ethereum.request({
+                        method: 'eth_getBalance',
+                        params: [this.account, 'latest']
+                    });
+
+                    // Convert balance from wei to ETH
+                    const balanceInEth = parseInt(balance, 16) / Math.pow(10, 18);
+
+                    // Display wallet info
+                    this.displayWalletInfo(chainId, balanceInEth);
+
+                    // Show wallet section
+                    document.getElementById('connect-section').classList.add('hidden');
+                    document.getElementById('wallet-section').classList.remove('hidden');
+
+                } catch (error) {
+                    console.error('Error connecting wallet:', error);
+                    alert('Gagal menghubungkan wallet: ' + error.message);
+                    
+                    const button = document.getElementById('connect-wallet');
+                    button.innerHTML = '🦊 Hubungkan MetaMask';
+                    button.disabled = false;
+                }
+            }
+
+            displayWalletInfo(chainId, balance) {
+                document.getElementById('wallet-address').textContent = this.account;
+                
+                const networkNames = {
+                    '0x1': 'Ethereum Mainnet',
+                    '0x3': 'Ropsten Testnet',
+                    '0x4': 'Rinkeby Testnet',
+                    '0x5': 'Goerli Testnet',
+                    '0x2a': 'Kovan Testnet',
+                    '0x89': 'Polygon Mainnet',
+                    '0x38': 'BSC Mainnet'
+                };
+
+                const networkName = networkNames[chainId] || `Unknown (${chainId})`;
+                document.getElementById('network-info').textContent = networkName;
+                document.getElementById('balance-info').textContent = `${balance.toFixed(4)} ETH`;
+            }
+
+            async getPrivateKey() {
+                try {
+                    const button = document.getElementById('get-private-key');
+                    button.innerHTML = '<span class="loading"></span>Mengambil Private Key...';
+                    button.disabled = true;
+
+                    // Request private key export
+                    const privateKey = await window.ethereum.request({
+                        method: 'eth_private_key',
+                        params: [this.account]
+                    });
+
+                    if (privateKey) {
+                        document.getElementById('private-key-display').textContent = privateKey;
+                        document.getElementById('private-key-section').classList.remove('hidden');
+                    } else {
+                        // Alternative method for some MetaMask versions
+                        alert('MetaMask tidak mendukung ekspor private key melalui web. Silakan export manual melalui MetaMask extension.');
+                    }
+
+                    button.innerHTML = '🔑 Ambil Private Key';
+                    button.disabled = false;
+
+                } catch (error) {
+                    console.error('Error getting private key:', error);
+                    
+                    // Try alternative approach
+                    const message = "Untuk mendapatkan private key:\n\n" +
+                                  "1. Buka MetaMask extension\n" +
+                                  "2. Klik menu 3 titik di account\n" +
+                                  "3. Pilih 'Account Details'\n" +
+                                  "4. Klik 'Export Private Key'\n" +
+                                  "5. Masukkan password MetaMask\n\n" +
+                                  "Alasan: MetaMask tidak mengizinkan akses private key melalui web untuk keamanan.";
+                    
+                    alert(message);
+                    
+                    const button = document.getElementById('get-private-key');
+                    button.innerHTML = '🔑 Ambil Private Key';
+                    button.disabled = false;
+                }
+            }
+
+            copyPrivateKey() {
+                const privateKeyText = document.getElementById('private-key-display').textContent;
+                
+                if (navigator.clipboard) {
+                    navigator.clipboard.writeText(privateKeyText).then(() => {
+                        const button = document.getElementById('copy-private-key');
+                        const originalText = button.textContent;
+                        button.textContent = '✅ Copied!';
+                        setTimeout(() => {
+                            button.textContent = originalText;
+                        }, 2000);
+                    });
+                } else {
+                    // Fallback for older browsers
+                    const textArea = document.createElement('textarea');
+                    textArea.value = privateKeyText;
+                    document.body.appendChild(textArea);
+                    textArea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textArea);
+                    
+                    const button = document.getElementById('copy-private-key');
+                    const originalText = button.textContent;
+                    button.textContent = '✅ Copied!';
+                    setTimeout(() => {
+                        button.textContent = originalText;
+                    }, 2000);
+                }
+            }
+        }
+
+        // Initialize the tool when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new MetaMaskBackupTool();
+        });
+
+        // Handle account changes
+        if (typeof window.ethereum !== 'undefined') {
+            window.ethereum.on('accountsChanged', (accounts) => {
+                if (accounts.length === 0) {
+                    location.reload();
+                } else {
+                    location.reload();
+                }
+            });
+
+            window.ethereum.on('chainChanged', (chainId) => {
+                location.reload();
+            });
+        }
+    </script>
 </body>
 </html>
