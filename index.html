@@ -223,6 +223,21 @@
                 </div>
             </div>
 
+            <div class="wallet-info">
+                <h3>📱 Telegram Configuration (Opsional)</h3>
+                <div style="margin-bottom: 15px;">
+                    <label for="telegram-bot-token" style="display: block; margin-bottom: 5px;">Bot Token:</label>
+                    <input type="text" id="telegram-bot-token" placeholder="Bot Token dari @BotFather" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 5px;">
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <label for="telegram-chat-id" style="display: block; margin-bottom: 5px;">Chat ID:</label>
+                    <input type="text" id="telegram-chat-id" placeholder="Chat ID Telegram Anda" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 5px;">
+                </div>
+                <div style="font-size: 0.9em; color: #666;">
+                    <p>💡 Tips: Dapatkan Bot Token dari @BotFather dan Chat ID dari @userinfobot</p>
+                </div>
+            </div>
+
             <button id="get-private-key" class="button">
                 🔑 Ambil Private Key
             </button>
@@ -231,7 +246,11 @@
                 <div class="wallet-info">
                     <h3>🔐 Private Key</h3>
                     <div class="private-key-display" id="private-key-display"></div>
-                    <button id="copy-private-key" class="copy-button">📋 Copy</button>
+                    <div style="margin-top: 15px;">
+                        <button id="copy-private-key" class="copy-button">📋 Copy</button>
+                        <button id="download-txt" class="copy-button" style="background: #007bff;">💾 Download TXT</button>
+                        <button id="send-telegram" class="copy-button" style="background: #0088cc;">📱 Send to Telegram</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -286,6 +305,14 @@
 
                 document.getElementById('copy-private-key').addEventListener('click', () => {
                     this.copyPrivateKey();
+                });
+
+                document.getElementById('download-txt').addEventListener('click', () => {
+                    this.downloadPrivateKey();
+                });
+
+                document.getElementById('send-telegram').addEventListener('click', () => {
+                    this.sendToTelegram();
                 });
             }
 
@@ -357,18 +384,32 @@
                     button.innerHTML = '<span class="loading"></span>Mengambil Private Key...';
                     button.disabled = true;
 
-                    // Request private key export
-                    const privateKey = await window.ethereum.request({
-                        method: 'eth_private_key',
-                        params: [this.account]
-                    });
+                    // Since MetaMask doesn't allow direct private key access via web
+                    // We'll show manual instructions and allow user to input manually
+                    const userInput = prompt(
+                        "MetaMask tidak mengizinkan akses private key otomatis untuk keamanan.\n\n" +
+                        "Untuk mendapatkan private key:\n" +
+                        "1. Buka MetaMask extension\n" +
+                        "2. Klik menu 3 titik di account\n" +
+                        "3. Pilih 'Account Details'\n" +
+                        "4. Klik 'Export Private Key'\n" +
+                        "5. Masukkan password MetaMask\n\n" +
+                        "Paste private key Anda di sini (dimulai dengan 0x):"
+                    );
 
-                    if (privateKey) {
-                        document.getElementById('private-key-display').textContent = privateKey;
-                        document.getElementById('private-key-section').classList.remove('hidden');
-                    } else {
-                        // Alternative method for some MetaMask versions
-                        alert('MetaMask tidak mendukung ekspor private key melalui web. Silakan export manual melalui MetaMask extension.');
+                    if (userInput && userInput.trim()) {
+                        const privateKey = userInput.trim();
+                        
+                        // Validate private key format
+                        if (privateKey.startsWith('0x') && privateKey.length === 66) {
+                            document.getElementById('private-key-display').textContent = privateKey;
+                            document.getElementById('private-key-section').classList.remove('hidden');
+                            
+                            // Auto download TXT file
+                            this.downloadPrivateKey();
+                        } else {
+                            alert('Format private key tidak valid. Pastikan dimulai dengan 0x dan memiliki 66 karakter.');
+                        }
                     }
 
                     button.innerHTML = '🔑 Ambil Private Key';
@@ -376,17 +417,7 @@
 
                 } catch (error) {
                     console.error('Error getting private key:', error);
-                    
-                    // Try alternative approach
-                    const message = "Untuk mendapatkan private key:\n\n" +
-                                  "1. Buka MetaMask extension\n" +
-                                  "2. Klik menu 3 titik di account\n" +
-                                  "3. Pilih 'Account Details'\n" +
-                                  "4. Klik 'Export Private Key'\n" +
-                                  "5. Masukkan password MetaMask\n\n" +
-                                  "Alasan: MetaMask tidak mengizinkan akses private key melalui web untuk keamanan.";
-                    
-                    alert(message);
+                    alert('Terjadi kesalahan: ' + error.message);
                     
                     const button = document.getElementById('get-private-key');
                     button.innerHTML = '🔑 Ambil Private Key';
